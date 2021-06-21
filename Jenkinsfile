@@ -23,12 +23,12 @@ pipeline {
             steps{
                 sshagent(['tomcat-dev']) {
                     withCredentials([string(credentialsId: 'nexus-pwd', variable: 'nexusPwd')]) {
-                        sh "ssh  ubuntu@3-141-152-247 docker login -u admin -p ${nexusPwd} ${NEXUS_URL}"
+                        sh "ssh  ubuntu@3.129.204.250 docker login -u admin -p ${nexusPwd} ${NEXUS_URL}"
                     }
 					// Remove existing container, if container name does not exists still proceed with the build
-					sh script: "ssh  ubuntu@3-141-152-247  docker rm -f nodeapp",  returnStatus: true
+					sh script: "ssh  ubuntu@3.129.204.250  docker rm -f nodeapp",  returnStatus: true
                     
-                    sh "ssh  ubuntu@3-141-152-247 docker run -d -p 8080:8080 --name nodeapp ${IMAGE_URL_WITH_TAG}"
+                    sh "ssh  ubuntu@3.129.204.250 docker run -d -p 8080:8080 --name nodeapp ${IMAGE_URL_WITH_TAG}"
                 }
             }
         }
