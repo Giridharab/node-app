@@ -11,7 +11,7 @@ pipeline {
                 sh "docker build . -t ${IMAGE_URL_WITH_TAG}"
             }
         }
-        stage('DockerHub Push'){
+        stage('Nexus Push'){
             steps{
                 withCredentials([string(credentialsId: 'nexus-pwd', variable: 'nexusPwd')]) {
                     sh "docker login -u admin -p ${nexusPwd} ${NEXUS_URL}"
@@ -19,9 +19,17 @@ pipeline {
                 }
             }
         }
-        stage ("Deploy to k8's"){
-            sshagent(['kube-master']) {
-                // some block
+        stage('Docker Deploy Dev'){
+            steps{
+                sshagent(['tomcat-dev']) {
+                    withCredentials([string(credentialsId: 'nexus-pwd', variable: 'nexusPwd')]) {
+                        sh "ssh  ubuntu@3-141-152-247 docker login -u admin -p ${nexusPwd} ${NEXUS_URL}"
+                    }
+					// Remove existing container, if container name does not exists still proceed with the build
+					sh script: "ssh  ubuntu@3-141-152-247  docker rm -f nodeapp",  returnStatus: true
+                    
+                    sh "ssh  ubuntu@3-141-152-247 docker run -d -p 8080:8080 --name nodeapp ${IMAGE_URL_WITH_TAG}"
+                }
             }
         }
     }
